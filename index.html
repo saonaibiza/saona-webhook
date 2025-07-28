@@ -77,44 +77,54 @@
     </div>
 
     <script>
-        // Depuración
+        // Depuración exhaustiva
         console.log('URL completa:', window.location.href);
         console.log('Parámetros de la URL:', window.location.search);
+        console.log('window.location:', window.location);
 
         // Obtener Combo ID de la URL
         const urlParams = new URLSearchParams(window.location.search);
-        console.log('urlParams:', urlParams.toString());
+        console.log('urlParams.toString():', urlParams.toString());
+        console.log('urlParams.get(ComboID):', urlParams.get('ComboID'));
+        console.log('urlParams.get(comboID):', urlParams.get('comboID'));
+
         let comboId = urlParams.get('ComboID') || urlParams.get('comboID');
 
         // Alternativa: Extraer ComboID manualmente
         if (!comboId) {
+            console.log('Intentando extracción manual de ComboID...');
             const url = window.location.href;
-            const match = url.match(/[?&]ComboID=([^&]*)/i);
+            const match = url.match(/[?&]ComboID=([^&#]*)/i);
             if (match) {
                 comboId = decodeURIComponent(match[1]);
+                console.log('ComboID extraído manualmente:', comboId);
+            } else {
+                console.log('No se encontró ComboID en la URL manualmente.');
             }
         }
 
         console.log('ComboID final:', comboId);
 
         if (!comboId) {
-            document.getElementById('error-message').innerText = 'Error: No se proporcionó un Combo ID. URL: ' + window.location.href;
+            document.getElementById('error-message').innerText = 'Error: No se proporcionó un Combo ID válido. URL: ' + window.location.href;
             document.getElementById('error-message').style.display = 'block';
             document.querySelector('.loading').style.display = 'none';
         } else {
             // Hacer solicitud al webhook
+            const payload = { 'Combo ID': comboId };
+            console.log('Enviando al webhook:', JSON.stringify(payload));
             fetch('https://hook.eu2.make.com/uc7qyz8lvfcepqw5f2wmzxvudsmsqq6v', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 'Combo ID': comboId })
+                body: JSON.stringify(payload)
             })
             .then(response => {
                 console.log('Respuesta del webhook:', response);
                 if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || 'Error desconocido.');
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text || 'Error desconocido.'}`);
                     });
                 }
                 return response.json();
@@ -122,12 +132,14 @@
             .then(data => {
                 console.log('Datos recibidos:', data);
                 if (data.success && data.formUrl) {
+                    console.log('Redirigiendo a:', data.formUrl);
                     window.location.href = data.formUrl;
                 } else {
-                    throw new Error('Respuesta inválida del servidor.');
+                    throw new Error('Respuesta inválida del servidor: ' + JSON.stringify(data));
                 }
             })
             .catch(error => {
+                console.log('Error en la solicitud:', error);
                 document.getElementById('error-message').innerText = error.message;
                 document.getElementById('error-message').style.display = 'block';
                 document.querySelector('.loading').style.display = 'none';
