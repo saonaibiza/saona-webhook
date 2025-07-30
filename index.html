@@ -40,75 +40,111 @@
         </script><!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Validación de Combo - Saona Ibiza</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #f4f4f4;
-      color: #222;
-      margin: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 36px;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-    .button {
-      display: inline-block;
-      padding: 12px 24px;
-      background-color: #007bff;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 5px;
-      font-size: 18px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    .button:hover {
-      background-color: #0056b3;
-    }
-    img {
-      margin-bottom: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de Combo - Saona Ibiza</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .loading {
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <img src="https://lh4.googleusercontent.com/iwmO55M26fIRCg9nFJK_pF-DG05wMsCFWyS3ehKCKYiB-1Ff4IQgI7HVjiIo8I3shP5M99DMwhntjM3TfPR03WBkvRnJnV8sJPxh-Zxfvk0kT_3REE07-ENgLWQH1RzaZtQ9C-54sZenD3zXPCgy2h6DKBPAz5jnR8HL2iO3lTYZFP8yJYhbjg=w1280" alt="Saona Logo" width="200">
-    <h1>¡Combo válido!</h1>
-    <p>Tu combo: <strong id="comboName">Cargando...</strong></p>
-    <p>Haz clic en el botón para continuar con la validación.</p>
-    <a id="validateButton" href="#" class="button">Validar</a>
-    <p style="font-size: 14px; margin-top: 20px;">Si tienes algún problema, contáctanos en <a href="mailto:saona.ibiza.pc@gmail.com">saona.ibiza.pc@gmail.com</a></p>
-  </div>
-  <script>
-    // Extraer parámetros de la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const comboName = urlParams.get('comboName') || 'Combo no especificado';
-    const comboId = urlParams.get('comboId') || '';
+    <div class="container">
+        <h2>Validando Combo...</h2>
+        <p class="loading">Por favor, espera un momento.</p>
+        <p id="error-message" class="error" style="display: none;"></p>
+    </div>
 
-    // Mostrar el nombre del combo
-    document.getElementById('comboName').textContent = comboName;
+    <script>
+        // Depuración exhaustiva
+        console.log('URL completa:', window.location.href);
+        console.log('Parámetros de la URL:', window.location.search);
+        console.log('window.location:', window.location);
 
-    // Configurar el enlace del botón
-    const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLSerF_iY_Yo6LNITc4saB1uLEfHCy4gjqZQHSBrDKtO-bmYFoQ/viewform?entry.731830732=${encodeURIComponent(comboId)}`;
-    document.getElementById('validateButton').href = formUrl;
-  </script>
+        // Obtener Combo ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('urlParams.toString():', urlParams.toString());
+        console.log('urlParams.get(ComboID):', urlParams.get('ComboID'));
+        console.log('urlParams.get(comboID):', urlParams.get('comboID'));
+
+        let comboId = urlParams.get('ComboID') || urlParams.get('comboID');
+
+        // Alternativa: Extraer ComboID manualmente
+        if (!comboId) {
+            console.log('Intentando extracción manual de ComboID...');
+            const url = window.location.href;
+            const match = url.match(/[?&]ComboID=([^&#]*)/i);
+            if (match) {
+                comboId = decodeURIComponent(match[1]);
+                console.log('ComboID extraído manualmente:', comboId);
+            } else {
+                console.log('No se encontró ComboID en la URL manualmente.');
+            }
+        }
+
+        console.log('ComboID final:', comboId);
+
+        if (!comboId) {
+            document.getElementById('error-message').innerText = 'Error: No se proporcionó un Combo ID válido. URL: ' + window.location.href;
+            document.getElementById('error-message').style.display = 'block';
+            document.querySelector('.loading').style.display = 'none';
+        } else {
+            // Hacer solicitud al webhook
+            const payload = { 'Combo ID': comboId };
+            console.log('Enviando al webhook:', JSON.stringify(payload));
+            fetch('https://hook.eu2.make.com/uc7qyz8lvfcepqw5f2wmzxvudsmsqq6v', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                console.log('Respuesta del webhook:', response);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text || 'Error desconocido.'}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos recibidos:', data);
+                if (data.success && data.formUrl) {
+                    console.log('Redirigiendo a:', data.formUrl);
+                    window.location.href = data.formUrl;
+                } else {
+                    throw new Error('Respuesta inválida del servidor: ' + JSON.stringify(data));
+                }
+            })
+            .catch(error => {
+                console.log('Error en la solicitud:', error);
+                document.getElementById('error-message').innerText = error.message;
+                document.getElementById('error-message').style.display = 'block';
+                document.querySelector('.loading').style.display = 'none';
+            });
+        }
+    </script>
 </body>
 </html>
