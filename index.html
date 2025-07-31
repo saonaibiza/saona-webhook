@@ -41,7 +41,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validación de Combo - Saona Ibiza</title>
+    <title>Validando Combo...</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,18 +61,6 @@
         h1 {
             color: #d9534f;
         }
-        button {
-            background-color: #28a745;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
         p {
             font-size: 16px;
         }
@@ -81,20 +69,9 @@
 <body>
     <div class="container">
         <img src="https://lh4.googleusercontent.com/iwmO55M26fIRCg9nFJK_pF-DG05wMsCFWyS3ehKCKYiB-1Ff4IQgI7HVjiIo8I3shP5M99DMwhntjM3TfPR03WBkvRnJnV8sJPxh-Zxfvk0kT_3REE07-ENgLWQH1RzaZtQ9C-54sZenD3zXPCgy2h6DKBPAz5jnR8HL2iO3lTYZFP8yJYhbjg=w1280" alt="Saona Logo" width="200">
-        <h1>¡Combo válido!</h1>
-        <p>Tu combo: <span id="comboName">Cargando...</span></p>
-        <p>Haz clic en el botón para continuar con la validación.</p>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSerF_iY_Yo6LNITc4saB1uLEfHCy4gjqZQHSBrDKtO-bmYFoQ/viewform?entry.731830732=" id="validateButton"><button>Validar</button></a>
+        <h1>Validando Combo...</h1>
+        <p>Por favor, espera un momento.</p>
         <p>Si tienes algún problema, contáctanos en <a href="mailto:saona.ibiza.pc@gmail.com">saona.ibiza.pc@gmail.com</a></p>
     </div>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const comboName = urlParams.get('comboName') || 'Combo no especificado';
-        const comboId = urlParams.get('comboId') || '';
-        document.getElementById('comboName').textContent = comboName;
-        if (comboId) {
-            document.getElementById('validateButton').href += comboId;
-        }
-    </script>
 </body>
 </html>
