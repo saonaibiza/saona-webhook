@@ -37,93 +37,113 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><html lang="es">
+        </script><!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validando Combo - Saona Ibiza</title>
+    <title>Validación de Combo - Saona Ibiza</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
+            text-align: center;
             padding: 20px;
+            background-color: white;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #d9534f;
-        }
-        p {
-            font-size: 16px;
-        }
         .error {
-            color: #d9534f;
+            color: red;
             font-weight: bold;
+        }
+        .loading {
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="https://raw.githubusercontent.com/saonaibiza/saona-webhook/refs/heads/main/IMG_20250510_152450.png" alt="Saona Logo" width="200">
-        <h1>Validando Combo...</h1>
-        <p id="statusMessage">Por favor, espera un momento.</p>
-        <p>Si tienes algún problema, contáctanos en <a href="mailto:saona.ibiza.pc@gmail.com">saona.ibiza.pc@gmail.com</a></p>
+        <h2>Validando Combo...</h2>
+        <p class="loading">Por favor, espera un momento.</p>
+        <p id="error-message" class="error" style="display: none;"></p>
     </div>
+
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const comboID = urlParams.get('ComboID') || urlParams.get('comboID') || '';
+        // Depuración exhaustiva
         console.log('URL completa:', window.location.href);
         console.log('Parámetros de la URL:', window.location.search);
+        console.log('window.location:', window.location);
+
+        // Obtener Combo ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
         console.log('urlParams.toString():', urlParams.toString());
         console.log('urlParams.get(ComboID):', urlParams.get('ComboID'));
         console.log('urlParams.get(comboID):', urlParams.get('comboID'));
-        console.log('ComboID final:', comboID);
 
-        if (comboID) {
-            console.log('Enviando al webhook:', { 'Combo ID': comboID });
+        let comboId = urlParams.get('ComboID') || urlParams.get('comboID');
+
+        // Alternativa: Extraer ComboID manualmente
+        if (!comboId) {
+            console.log('Intentando extracción manual de ComboID...');
+            const url = window.location.href;
+            const match = url.match(/[?&]ComboID=([^&#]*)/i);
+            if (match) {
+                comboId = decodeURIComponent(match[1]);
+                console.log('ComboID extraído manualmente:', comboId);
+            } else {
+                console.log('No se encontró ComboID en la URL manualmente.');
+            }
+        }
+
+        console.log('ComboID final:', comboId);
+
+        if (!comboId) {
+            document.getElementById('error-message').innerText = 'Error: No se proporcionó un Combo ID válido. URL: ' + window.location.href;
+            document.getElementById('error-message').style.display = 'block';
+            document.querySelector('.loading').style.display = 'none';
+        } else {
+            // Hacer solicitud al webhook
+            const payload = { 'Combo ID': comboId };
+            console.log('Enviando al webhook:', JSON.stringify(payload));
             fetch('https://hook.eu2.make.com/uc7qyz8lvfcepqw5f2wmzxvudsmsqq6v', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 'Combo ID': comboID })
+                body: JSON.stringify(payload)
             })
             .then(response => {
                 console.log('Respuesta del webhook:', response);
-                return response.text().then(text => ({ status: response.status, text }));
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text || 'Error desconocido.'}`);
+                    });
+                }
+                return response.json();
             })
             .then(data => {
-                if (data.status === 200) {
-                    document.getElementById('statusMessage').textContent = 'Redirigiendo...';
-                    // El webhook maneja la redirección a success.html
+                console.log('Datos recibidos:', data);
+                if (data.success && data.formUrl) {
+                    console.log('Redirigiendo a:', data.formUrl);
+                    window.location.href = data.formUrl;
                 } else {
-                    throw new Error(`Error ${data.status}: ${data.text}`);
+                    throw new Error('Respuesta inválida del servidor: ' + JSON.stringify(data));
                 }
             })
             .catch(error => {
-                console.error('Error en la solicitud:', error);
-                document.getElementById('statusMessage').className = 'error';
-                document.getElementById('statusMessage').textContent = error.message.includes('Este combo ya fue entregado') 
-                    ? 'Este combo ya fue entregado.' 
-                    : error.message.includes('no se encontró') 
-                    ? 'El Combo ID no se encontró en la hoja Ventas.'
-                    : error.message.includes('válida a partir de') 
-                    ? error.message.split(': ')[1]
-                    : error.message.includes('después de las 21:00') 
-                    ? 'Lo sentimos, esta entrada no es válida porque fue comprada después de las 21:00.'
-                    : 'Error al validar el combo. Por favor, intenta de nuevo.';
+                console.log('Error en la solicitud:', error);
+                document.getElementById('error-message').innerText = error.message;
+                document.getElementById('error-message').style.display = 'block';
+                document.querySelector('.loading').style.display = 'none';
             });
-        } else {
-            document.getElementById('statusMessage').className = 'error';
-            document.getElementById('statusMessage').textContent = 'No se proporcionó un Combo ID válido.';
         }
     </script>
 </body>
