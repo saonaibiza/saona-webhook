@@ -115,6 +115,10 @@
                     ? 'Este combo ya fue entregado.' 
                     : error.message.includes('no se encontró') 
                     ? 'El Combo ID no se encontró en la hoja Ventas.'
+                    : error.message.includes('válida a partir de') 
+                    ? error.message.split(': ')[1]
+                    : error.message.includes('después de las 21:00') 
+                    ? 'Lo sentimos, esta entrada no es válida porque fue comprada después de las 21:00.'
                     : 'Error al validar el combo. Por favor, intenta de nuevo.';
             });
         } else {
