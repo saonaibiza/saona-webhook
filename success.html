@@ -80,7 +80,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="https://lh4.googleusercontent.com/iwmO55M26fIRCg9nFJK_pF-DG05wMsCFWyS3ehKCKYiB-1Ff4IQgI7HVjiIo8I3shP5M99DMwhntjM3TfPR03WBkvRnJnV8sJPxh-Zxfvk0kT_3REE07-ENgLWQH1RzaZtQ9C-54sZenD3zXPCgy2h6DKBPAz5jnR8HL2iO3lTYZFP8yJYhbjg=w1280" alt="Saona Logo" width="200">
+        <img src="https://raw.githubusercontent.com/saonaibiza/saona-webhook/refs/heads/main/IMG_20250510_152450.png" alt="Saona Logo" width="200">
         <h1>¡Combo válido!</h1>
         <p>Tu combo: <span id="comboName">Cargando...</span></p>
         <p>Haz clic en el botón para continuar con la validación.</p>
@@ -95,6 +95,8 @@
         if (comboId) {
             document.getElementById('validateButton').href += comboId;
         }
+        console.log("comboName:", comboName);
+        console.log("comboId:", comboId);
     </script>
 </body>
 </html>
